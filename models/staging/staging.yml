@@ -1,0 +1,106 @@
+version: 2
+
+models:
+  - name: stg_students
+    description: >
+      One row per student. Sourced from the raw_students seed, lightly cleaned
+      and renamed. Grain: student_id.
+    columns:
+      - name: student_id
+        description: Primary key. Unique student identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: join_ts
+        description: Timestamp the student first joined.
+        data_tests:
+          - not_null
+      - name: country_code
+        description: Student's country.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ES', 'US', 'UK', 'DE', 'FR', 'BR', 'MX', 'IT', 'NL', 'PL', 'JP', 'AR', 'TR', 'SE', 'AU']
+      - name: acquisition_channel
+        description: Marketing channel the student was acquired through.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['CRM', 'Paid', 'Direct & Brand', 'WoM', 'Other']
+      - name: persona
+        description: Behavioural segment assigned to the student.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['working_professional', 'relocator', 'exam_prepper', 'conversationalist']
+      - name: first_subject
+        description: First subject the student studied.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['english', 'spanish', 'french', 'portuguese', 'german', 'italian']
+
+  - name: stg_payments
+    description: >
+      One row per payment. Sourced from the raw_payments seed, lightly cleaned
+      and renamed. Grain: payment_id. A payment opens a 28-day consumption cycle.
+    columns:
+      - name: payment_id
+        description: Primary key. Unique payment identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: student_id
+        description: Foreign key to stg_students.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_students')
+                field: student_id
+      - name: payment_ts
+        description: Timestamp the payment was made. Subsequent payments fall exactly 28 days later.
+        data_tests:
+          - not_null
+      - name: hours
+        description: Number of hours purchased in this payment.
+        data_tests:
+          - not_null
+      - name: price_per_hour_usd
+        description: Price per hour in USD for this payment.
+        data_tests:
+          - not_null
+
+  - name: stg_lessons
+    description: >
+      One row per booked lesson. Sourced from the raw_lessons seed, lightly cleaned
+      and renamed. Grain: lesson_id.
+    columns:
+      - name: lesson_id
+        description: Primary key. Unique lesson identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: student_id
+        description: Foreign key to stg_students.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_students')
+                field: student_id
+      - name: booking_ts
+        description: Timestamp the lesson was booked.
+        data_tests:
+          - not_null
+      - name: hours_booked
+        description: Duration of the booked lesson in hours.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0.5, 1.0, 1.5, 2.0]
