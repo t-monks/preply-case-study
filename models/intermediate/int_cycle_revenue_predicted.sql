@@ -6,6 +6,7 @@ WITH cycles AS (
         start_date, 
         end_date, 
         lifetime_payment_number_bucket, 
+        lifetime_payment_number, 
         total_hours_purchased, 
         total_hours_used, 
         pct_hours_used, 
@@ -46,12 +47,14 @@ SELECT
     cycles.end_date, 
     cycles.price_per_hour_usd, 
     cycles.lifetime_payment_number_bucket, 
+    cycles.lifetime_payment_number, 
     cycles.price_bucket, 
     CASE WHEN 
         cycles.pct_hours_used >= avg.avg_pct_hours_used 
         THEN cycles.pct_hours_used 
         ELSE avg.avg_pct_hours_used 
-        END AS predicted_pct_hours_used
+        END AS predicted_pct_hours_used, 
+    avg.avg_pct_hours_used AS cohort_pct_hours_used
 FROM cycles 
 LEFT JOIN student_dimensions student
     ON student.student_id = cycles.student_id 
@@ -69,10 +72,12 @@ SELECT
     end_date, 
     total_hours_purchased, 
     lifetime_payment_number_bucket, 
+    lifetime_payment_number, 
     price_bucket, 
     predicted_pct_hours_used * total_hours_purchased AS predicted_total_hours_used, 
     predicted_total_hours_used * price_per_hour_usd * 0.2 AS predicted_usage_revenue, 
-    (total_hours_purchased - predicted_total_hours_used) * price_per_hour_usd AS predicted_breakage_revenue
+    (total_hours_purchased - predicted_total_hours_used) * price_per_hour_usd AS predicted_breakage_revenue, 
+    cohort_pct_hours_used
 
 FROM predicted_pcts
     
