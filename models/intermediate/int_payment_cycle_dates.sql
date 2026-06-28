@@ -10,6 +10,13 @@ WITH payments AS (
 
 ),
 
+students AS (
+    SELECT 
+        student_id, 
+        join_ts 
+    FROM {{ ref('stg_students') }}
+), 
+
 cycles AS (
 
     SELECT
@@ -28,11 +35,14 @@ cycles AS (
 )
 
 SELECT
-    student_id,
-    payment_id,
-    start_date,
-    end_date,
-    lifetime_payment_number, 
-    total_hours_purchased, 
-    price_per_hour_usd
-FROM cycles
+    cycles.student_id,
+    cycles.payment_id,
+    cycles.start_date,
+    cycles.end_date,
+    cycles.lifetime_payment_number, 
+    students.join_ts, 
+    cycles.total_hours_purchased, 
+    cycles.price_per_hour_usd
+FROM cycles 
+LEFT JOIN students 
+    ON students.student_id = cycles.student_id

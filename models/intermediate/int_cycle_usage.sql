@@ -6,6 +6,7 @@ WITH cycles AS (
         lifetime_payment_number,
         start_date, 
         end_date, 
+        join_ts, 
         total_hours_purchased, 
         price_per_hour_usd, 
         CASE WHEN 
@@ -44,6 +45,7 @@ joined AS (
         cycles.end_date, 
         cycles.lifetime_payment_number,
         cycles.lifetime_payment_number_bucket, 
+        cycles.join_ts, 
         CASE
             WHEN cycles.end_date < CURRENT_TIMESTAMP THEN 1
             ELSE 0
@@ -62,7 +64,8 @@ SELECT
     payment_id,
     student_id,
     start_date, 
-    end_date, 
+    end_date,
+    join_ts,  
     lifetime_payment_number,
     lifetime_payment_number_bucket, 
     is_cycle_ended,
