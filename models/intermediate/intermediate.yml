@@ -36,3 +36,50 @@ models:
           student is 1.
         data_tests:
           - not_null
+
+  - name: int_lesson_cycle_mapping
+    description: >
+      Maps each lesson from stg_lessons to the payment cycle from
+      int_payment_cycle_dates it falls within. A lesson belongs to a cycle when it
+      was booked by the same student and its booking timestamp lands on or after
+      the cycle start and before the cycle end. Grain: lesson_id.
+    columns:
+      - name: lesson_id
+        description: Primary key. Unique lesson identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: student_id
+        description: Foreign key to stg_students. The student who booked the lesson.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_students')
+                field: student_id
+      - name: booking_ts
+        description: Timestamp the lesson was booked.
+        data_tests:
+          - not_null
+      - name: hours_booked
+        description: Duration of the booked lesson in hours.
+        data_tests:
+          - not_null
+      - name: payment_id
+        description: Foreign key to int_payment_cycles. The payment whose cycle contains this lesson.
+        data_tests:
+          - not_null
+      - name: lifetime_payment_number
+        description: >
+          Lifetime order of the payment cycle this lesson falls within, earliest
+          payment per student being 1.
+        data_tests:
+          - not_null
+      - name: start_date
+        description: Timestamp the matched payment cycle starts (the payment timestamp).
+        data_tests:
+          - not_null
+      - name: end_date
+        description: Timestamp the matched payment cycle ends, exactly 28 days after the payment.
+        data_tests:
+          - not_null
