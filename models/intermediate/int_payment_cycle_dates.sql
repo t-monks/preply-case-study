@@ -3,7 +3,9 @@ WITH payments AS (
     SELECT
         payment_id,
         student_id,
-        payment_ts
+        payment_ts, 
+        hours, 
+        price_per_hour_usd
     FROM {{ ref('stg_payments') }}
 
 ),
@@ -18,7 +20,9 @@ cycles AS (
         ROW_NUMBER() OVER (
             PARTITION BY student_id
             ORDER BY payment_ts
-        ) AS lifetime_payment_number
+        ) AS lifetime_payment_number, 
+        hours AS total_hours_purchased, 
+        price_per_hour_usd
     FROM payments
 
 )
@@ -28,5 +32,7 @@ SELECT
     payment_id,
     start_date,
     end_date,
-    lifetime_payment_number
+    lifetime_payment_number, 
+    total_hours_purchased, 
+    price_per_hour_usd
 FROM cycles
