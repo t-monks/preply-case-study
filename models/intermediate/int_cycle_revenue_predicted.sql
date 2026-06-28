@@ -39,11 +39,14 @@ predicted_pcts AS (
 
 SELECT 
     cycles.payment_id, 
+    cycles.student_id, 
     cycles.total_hours_purchased, 
     cycles.total_hours_used, 
     cycles.start_date, 
     cycles.end_date, 
     cycles.price_per_hour_usd, 
+    cycles.lifetime_payment_number_bucket, 
+    cycles.price_bucket, 
     CASE WHEN 
         cycles.pct_hours_used >= avg.avg_pct_hours_used 
         THEN cycles.pct_hours_used 
@@ -61,12 +64,15 @@ LEFT JOIN cohort_avg avg
 
 SELECT 
     payment_id, 
+    student_id, 
     start_date, 
     end_date, 
     total_hours_purchased, 
+    lifetime_payment_number_bucket, 
+    price_bucket, 
     predicted_pct_hours_used * total_hours_purchased AS predicted_total_hours_used, 
     predicted_total_hours_used * price_per_hour_usd * 0.2 AS predicted_usage_revenue, 
-    (total_hours_purchased * price_per_hour_usd) - predicted_usage_revenue AS predicted_breakage_revenue
+    (total_hours_purchased - predicted_total_hours_used) * price_per_hour_usd AS predicted_breakage_revenue
 
 FROM predicted_pcts
     

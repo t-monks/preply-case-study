@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: mart_cycle_revenue
+    description: >
+      One row per payment cycle, comparing predicted revenue against actual
+      realised revenue and enriched with student dimensions for slicing.
+      Predicted figures come from int_cycle_revenue_predicted (all cycles);
+      actual figures come from int_cycle_revenue_completed (completed cycles
+      only) and are null for cycles still in progress. Student attributes are
+      joined from stg_students. Grain: payment_id.
+    columns:
+      - name: payment_id
+        description: Primary key. Identifies the cycle (one cycle per payment).
+        data_tests:
+          - unique
+          - not_null
+      - name: start_date
+        description: Timestamp the cycle starts (the payment timestamp).
+        data_tests:
+          - not_null
+      - name: end_date
+        description: Timestamp the cycle ends, exactly 28 days after the payment.
+        data_tests:
+          - not_null
+      - name: predicted_usage_revenue
+        description: >
+          Predicted platform revenue from consumed hours (20% take), from
+          int_cycle_revenue_predicted.
+        data_tests:
+          - not_null
+      - name: predicted_breakage_revenue
+        description: >
+          Predicted USD value of unused hours, from int_cycle_revenue_predicted.
+        data_tests:
+          - not_null
+      - name: predicted_total_revenue
+        description: >
+          Predicted total revenue for the cycle:
+          predicted_usage_revenue + predicted_breakage_revenue.
+        data_tests:
+          - not_null
+      - name: usage_revenue_usd
+        description: >
+          Actual platform revenue from consumed hours for completed cycles.
+          Null while the cycle is still in progress.
+      - name: breakage_revenue_usd
+        description: >
+          Actual USD value of unused hours for completed cycles. Null while the
+          cycle is still in progress.
+      - name: total_revenue
+        description: >
+          Actual total revenue for completed cycles:
+          usage_revenue_usd + breakage_revenue_usd. Null while in progress.
+      - name: lifetime_payment_number_bucket
+        description: >
+          Lifetime cycle order bucketed for cohorting, with 5 or above as '5+'.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['1', '2', '3', '4', '5+']
+      - name: price_bucket
+        description: >
+          Price-per-hour band of the cycle: '0-10', '10-15', '15-20' or '20+'.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['0-10', '10-15', '15-20', '20+']
+      - name: persona
+        description: Student behavioural segment from stg_students.
+      - name: country_code
+        description: Student's country, from stg_students.
+      - name: acquisition_channel
+        description: Marketing channel the student was acquired through, from stg_students.
+      - name: first_subject
+        description: First subject the student studied, from stg_students.
+      - name: is_cycle_ended
+        description: >
+          Binary flag: 1 if the cycle has ended, else 0. Coalesced to 0 for
+          cycles with no completed-revenue row.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
