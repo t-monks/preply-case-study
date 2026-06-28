@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: int_payment_cycle_dates
+    description: >
+      One row per payment, with the 28-day consumption cycle it opens. Sourced
+      from stg_payments. The cycle starts at the payment timestamp and ends
+      exactly 28 days later. Each payment is also numbered by its order within
+      the student's lifetime, earliest first. Grain: payment_id.
+    columns:
+      - name: student_id
+        description: Foreign key to stg_students. The student who made the payment.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_students')
+                field: student_id
+      - name: payment_id
+        description: Primary key. Unique payment identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: start_date
+        description: Timestamp the cycle starts, equal to the payment timestamp.
+        data_tests:
+          - not_null
+      - name: end_date
+        description: Timestamp the cycle ends, exactly 28 days after the payment timestamp.
+        data_tests:
+          - not_null
+      - name: lifetime_payment_number
+        description: >
+          Sequential number of this payment within the student's lifetime,
+          ordered by payment timestamp ascending. The earliest payment per
+          student is 1.
+        data_tests:
+          - not_null
