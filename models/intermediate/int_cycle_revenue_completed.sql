@@ -9,7 +9,8 @@ WITH completed_cycles AS (
         total_hours_used, 
         pct_hours_used, 
         price_per_hour_usd, 
-        price_bucket
+        price_bucket, 
+        is_cycle_ended
     FROM {{ ref('int_cycle_usage') }}
     WHERE is_cycle_ended = 1
 
@@ -22,6 +23,7 @@ WITH completed_cycles AS (
         lifetime_payment_number_bucket, 
         price_per_hour_usd, 
         price_bucket,
+        is_cycle_ended, 
         ROUND(
             (total_hours_used * price_per_hour_usd) * 0.2, 2) AS usage_revenue_usd, 
         ROUND(
