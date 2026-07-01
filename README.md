@@ -21,6 +21,7 @@ cycles report *actual* breakage; cycles still open at the as-of date get a
 dbt deps          # install packages (dbt_utils etc.)
 dbt seed          # load the three raw CSVs as tables
 dbt build         # run + test every model in dependency order
+dbt build -s +mart_cycle_revenue --vars '{as_of_date: "2026-04-30"}' # set the date that you would like to check the predicted revenue as of 
 ```
 
 `dbt build` runs models and their tests together. To build just one layer or one

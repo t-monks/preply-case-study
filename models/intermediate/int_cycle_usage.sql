@@ -1,3 +1,5 @@
+{% set as_of_date = var('as_of_date', run_started_at.strftime('%Y-%m-%d')) %}
+
 WITH cycles AS (
 
     SELECT
@@ -47,7 +49,7 @@ joined AS (
         cycles.lifetime_payment_number_bucket, 
         cycles.join_ts, 
         CASE
-            WHEN cycles.end_date < CURRENT_TIMESTAMP THEN 1
+            WHEN cycles.end_date < '{{ as_of_date }}'::DATE THEN 1
             ELSE 0
         END AS is_cycle_ended,
         cycles.total_hours_purchased,
